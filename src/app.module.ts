@@ -3,6 +3,9 @@ import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { UserModule } from './users/user.module.js';
+import { BooksModule } from './books/books.module.js';
+import { BorrowBookModule } from './borrow-book/borrow-book.module.js';
 
 @Module({
   imports: [
@@ -25,6 +28,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
         logging: true, // log query sql ,chỉ dùng ở local/dev
       }),
     }),
+
+    UserModule,
+
+    BooksModule,
+
+    BorrowBookModule,
   ],
   controllers: [AppController],
   providers: [AppService],
