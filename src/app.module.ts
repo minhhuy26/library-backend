@@ -3,9 +3,15 @@ import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserModule } from './users/user.module.js';
+import { UsersModule } from './users/users.module.js';
 import { BooksModule } from './books/books.module.js';
-import { BorrowBookModule } from './borrow-book/borrow-book.module.js';
+import { CategoriesModule } from './categories/categories.module.js';
+import { BorrowBooksModule } from './borrow-books/borrow-books.module.js';
+import { Book } from './books/entities/book.entity.js';
+import { User } from './users/entities/user.entity.js';
+import { Category } from './categories/entities/category.entity.js';
+import { BorrowBook } from './borrow-books/entities/borrow-book.entity.js';
+import { AuthModule } from './auth/auth.module.js';
 
 @Module({
   imports: [
@@ -23,17 +29,21 @@ import { BorrowBookModule } from './borrow-book/borrow-book.module.js';
         username: configService.get('DB_USERNAME'),
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_NAME'),
-        entities: [], // Chỉ định các entity ở đây
+        entities: [User, Book, Category, BorrowBook], // Chỉ định các entity ở đây
         synchronize: true, // Tự động tạo bảng từ Entity ở env local
         logging: true, // log query sql ,chỉ dùng ở local/dev
       }),
     }),
 
-    UserModule,
+    UsersModule,
 
     BooksModule,
 
-    BorrowBookModule,
+    CategoriesModule,
+
+    BorrowBooksModule,
+
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,24 +1,45 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryColumn,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { BorrowBook } from '../../borrow-books/entities/borrow-book.entity.js';
 
 @Entity('users')
 export class User {
-  @PrimaryGeneratedColumn('uuid') // Random
+  @PrimaryGeneratedColumn('uuid')
   id: string;
-  @Column()
+
+  @Column({ nullable: false })
   fullName: string;
-  @Column()
+
+  @Column({ nullable: false })
   phone: string;
-  @Column({ unique: true, nullable: false })
+
+  @Column({ nullable: false, unique: true })
   email: string;
+
   @Column({ nullable: false })
   password: string;
+
   @Column({ nullable: false })
   role: string;
-  @Column({ nullable: false, default: true })
+
+  @Column({ default: true, nullable: false })
   isActive: boolean;
+
   @Column()
-  createDate: Date;
+  createdAt: Date;
+
   @Column()
-  updateAt: Date;
-  borrowBooks: any;
+  updatedAt: Date;
+
+  @OneToMany(() => BorrowBook, (borrwowBook) => borrwowBook.user)
+  borrowBook: any;
+
+  @Column({ nullable: true })
+  avatar: string;
 }
