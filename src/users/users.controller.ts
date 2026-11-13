@@ -11,6 +11,7 @@ import {
   Req,
   UploadedFile,
   UseInterceptors,
+  Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service.js';
 import { CreateUserDto } from './dto/create-user.dto.js';
@@ -24,22 +25,27 @@ import type { Request, Express } from 'express';
 import { ChangePasswordDto } from './dto/change-password.dto.js';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
+import { AdminChangePasswordDto } from './dto/admin.change-password.dto.js';
+import { UpdateUserDto } from './dto/update-user.dto.js';
+import { ToggleActiveDto } from './dto/togggle-active.dto.js';
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
-
-  @Get()
+  // Admin tạo user
+  @Post('admin/add-user')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.USER)
+  @Roles(Role.ADMIN)
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
+  // Lấy thông tin cá nhân
   @Get('/profile')
   @UseGuards(JwtAuthGuard)
   getProfile(@Req() req: Request) {
     const user: any = req.user;
     return this.usersService.getProfile(user.id);
   }
+  // Cho đổi avatar
   @Patch('change-avatar')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(
@@ -66,17 +72,37 @@ export class UsersController {
     const userReq = req.user;
     return this.usersService.changeAvatar(userReq, file);
   }
-
+  // Admin đổi mật khẩu cho users
+  @Patch('/admin/change-user-password')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  adminChangePassword(@Body() adminChangePasswordDto: AdminChangePasswordDto) {
+    return this.usersService.adminChangePassword(adminChangePasswordDto);
+  }
+  // Tìm danh sách users
   @Get()
-  findAll() {
-    return this.usersService.findAll();
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.LIBRARIAN)
+  findAll(
+    @Query('email') email: string,
+    @Query('phone') phone: string,
+    @Query('role') role: string,
+  ) {
+    const queryParam = {
+      email,
+      phone,
+      role,
+    };
+    return this.usersService.findAll(queryParam);
   }
-
+  // Lấy thông tin theo id
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.LIBRARIAN)
+  getUser(@Param('id') id: string) {
+    return this.usersService.getUser(id);
   }
-
+  // Đổi password
   @Patch('/change-password')
   @UseGuards(JwtAuthGuard)
   changePassword(
@@ -86,9 +112,24 @@ export class UsersController {
     const userReq = req.user;
     return this.usersService.changePassword(userReq, changePasswordDto);
   }
-
+  // Cập nhật thông tin theo id
+  @Patch(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  update(@Param('id') id: string, updateUserDto: UpdateUserDto) {
+    return this.usersService.update(id, updateUserDto);
+  }
+  // Xóa user theo id
   @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+    return this.usersService.remove(id);
+  }
+  @Patch(':id/toggle-active')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  toggleAcive(@Param('id') id: string, toggleActiveDto: ToggleActiveDto) {
+    return this.usersService.toggleAcive(id, toggleActiveDto);
   }
 }
